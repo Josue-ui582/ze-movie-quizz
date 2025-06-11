@@ -1,9 +1,9 @@
 import { GraphQLSchema } from "graphql";
 import { buildSchema } from "type-graphql";
-import { userResolver } from "../resolvers/user";
+import { UserResolver } from "../resolvers/UserResolver";
 
 export const createSchema = (): Promise<GraphQLSchema> =>
   buildSchema({
-    resolvers: [userResolver],
+    resolvers: [URIErrorserResolver],
     validate: false,
   });

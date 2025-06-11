@@ -13,17 +13,30 @@ interface IRegisterProps {}
 const Register: NextPage<IRegisterProps> = () => {
   const router = useRouter();
   const [, register] = useRegisterMutation();
+
   return (
     <Wrapper variant="small">
       <Formik
-        initialValues={{ username: "", email: "" }}
-        onSubmit={async (values) => {
-          const response = await register({ input: values });
-          const user = response.data?.register;
-          if (user) {
-            router.push(`user/${user.username}`);
-          }
-        }}
+        initialValues={{ username: "", email: "", password: "" }}
+        onSubmit={async (values, { setErrors }) => {
+        const response = await register({ input: values });
+        const registerResponse = response.data?.register;
+
+        if (registerResponse?.errors) {
+          setErrors(
+            registerResponse.errors.reduce(
+              (acc: Record<string, string>, { field, message }: { field: string; message: string }) => {
+                acc[field] = message;
+                return acc;
+              },
+              {}
+            )
+          );
+        } else if (registerResponse?.user) {
+          router.push(`/user/${registerResponse.user.username}`);
+        }
+      }}
+
       >
         {({ isSubmitting }) => (
           <Form>
@@ -40,14 +53,23 @@ const Register: NextPage<IRegisterProps> = () => {
                 type="email"
               />
             </Box>
+            <Box mt={4}>
+              <InputField
+                name="password"
+                placeholder="password"
+                label="Password"
+                type="password"
+              />
+            </Box>
             <Button
               type="submit"
-              mt={4}
-              isLoading={isSubmitting}
-              colorScheme="blue"
-            >
-              register
+                isLoading={isSubmitting}
+                colorScheme="blue"
+                style={{ marginTop: '1rem' }}
+              >
+                register
             </Button>
+
           </Form>
         )}
       </Formik>
