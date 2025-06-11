@@ -1,6 +1,8 @@
-import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Mutation, Query, Resolver, Ctx } from "type-graphql";
 import { User } from "../entities/User";
 import { UserInput } from "../types";
+import bcrypt from "bcryptjs";
+import { MyContext } from "../types/MyContext";
 import { UserResponse, FieldError } from "./UserResponse";
 
 @Resolver()
@@ -53,6 +55,35 @@ export class UserResolver {
         ],
       };
     }
+  }
+
+  @Mutation(() => UserResponse)
+  async login(
+    @Arg("username") username: string,
+    @Arg("password") password: string,
+    @Ctx() { req }: MyContext
+  ): Promise<UserResponse> {
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return {
+        errors: [
+          { field: "username", message: "Username does not exist" },
+        ],
+      };
+    }
+
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return {
+        errors: [
+          { field: "password", message: "Incorrect password" },
+        ],
+      };
+    }
+
+    req.session.userId = user.id;
+
+    return { user };
   }
 
   @Query(() => User, { nullable: true })
