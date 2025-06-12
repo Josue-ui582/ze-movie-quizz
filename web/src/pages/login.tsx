@@ -29,7 +29,10 @@ const Login: NextPage<ILoginProps> = () => {
         initialValues={{ username: "", password: "" }}
         onSubmit={async (values, { setErrors }) => {
           const response = await login(values);
+          console.log("Login response raw:", response);
+
           const loginResponse = response.data?.login;
+          console.log("Login response parsed:", loginResponse);
 
           if (loginResponse?.errors) {
             setErrors(

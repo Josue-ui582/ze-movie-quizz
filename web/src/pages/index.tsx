@@ -1,14 +1,14 @@
-import { useCheckAuth } from "../hooks/useCheckAuth";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
-export default function Home() {
-  const { loading, authenticated } = useCheckAuth();
+const HomePage = () => {
+  const router = useRouter();
 
-  if (loading) return <div>Loading...</div>;
-  if (!authenticated) return null;
+  useEffect(() => {
+    router.replace("/login");
+  }, [router]);
 
-  return (
-    <div>
-      <h1>Bienvenue sur ta page d'accueil protégée</h1>
-    </div>
-  );
-}
+  return null;
+};
+
+export default HomePage;

@@ -1,8 +1,8 @@
 import "reflect-metadata";
 import express from "express";
 import cors from "cors";
+import session from "express-session";
 import { ApolloServer } from "apollo-server-express";
-
 import { openDBConnection } from "./utils/database";
 import config from "./constants";
 import { createSchema } from "./utils/createSchema";
@@ -19,31 +19,56 @@ const main = async () => {
       break;
     } catch (error) {
       retries -= 1;
-      console.log(error);
-      console.log(`retries left: ${retries}`);
+      console.error("Erreur de connexion DB :", error);
+      console.log(`Tentatives restantes : ${retries}`);
       await new Promise((res) => setTimeout(res, retryTimeout));
     }
   }
 
   const app = express();
 
-  //set up cors with express cors middleware
   app.use(
-    cors({ origin: [config.frontend_url, config.studio_apollo_graphql_url] })
+    cors({
+      origin: "http://localhost:3000",
+      credentials: true,
+    })
   );
+
+  app.use(
+    session({
+      name: "qid",
+      secret: "super-secret-key",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      },
+    })
+  );
+
+  app.use(express.json());
 
   const apolloServer = new ApolloServer({
     schema: await createSchema(),
+    context: ({ req, res }) => ({ req, res }),
   });
 
   await apolloServer.start();
-  apolloServer.applyMiddleware({ app, cors: false });
+  apolloServer.applyMiddleware({
+    app,
+    cors: false,
+  });
 
   app.listen(config.port, () => {
-    console.log(`server started on port ${config.port}`);
+    console.log(
+      `🚀 Serveur démarré sur http://localhost:${config.port}${apolloServer.graphqlPath}`
+    );
   });
 };
 
 main().catch((err) => {
-  console.log(err);
+  console.error("Erreur serveur :", err);
 });

@@ -4,6 +4,6 @@ import { UserResolver } from "../resolvers/UserResolver";
 
 export const createSchema = (): Promise<GraphQLSchema> =>
   buildSchema({
-    resolvers: [URIErrorserResolver],
+    resolvers: [UserResolver],
     validate: false,
   });

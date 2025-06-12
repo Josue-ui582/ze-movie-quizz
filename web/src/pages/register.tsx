@@ -30,6 +30,7 @@ const Register: NextPage<IRegisterProps> = () => {
         onSubmit={async (values, { setErrors }) => {
           const response = await register({ input: values });
           const registerResponse = response.data?.register;
+          console.log(registerResponse);
 
           if (registerResponse?.errors) {
             setErrors(
@@ -42,7 +43,7 @@ const Register: NextPage<IRegisterProps> = () => {
               )
             );
           } else if (registerResponse?.user) {
-            router.push(`/user/${registerResponse.user.username}`);
+            router.push("/login");
           }
         }}
       >
