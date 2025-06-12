@@ -1,6 +1,5 @@
 import "reflect-metadata";
 import express from "express";
-import cors from "cors";
 import session from "express-session";
 import { ApolloServer } from "apollo-server-express";
 import { openDBConnection } from "./utils/database";
@@ -28,13 +27,6 @@ const main = async () => {
   const app = express();
 
   app.use(
-    cors({
-      origin: "http://localhost:3000",
-      credentials: true,
-    })
-  );
-
-  app.use(
     session({
       name: "qid",
       secret: "super-secret-key",
@@ -42,9 +34,9 @@ const main = async () => {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: false,
+        secure: false, // true en production avec HTTPS
         sameSite: "lax",
-        maxAge: 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 7 jours
       },
     })
   );
@@ -57,9 +49,13 @@ const main = async () => {
   });
 
   await apolloServer.start();
+
   apolloServer.applyMiddleware({
     app,
-    cors: false,
+    cors: {
+      origin: "http://localhost:3000",
+      credentials: true,
+    },
   });
 
   app.listen(config.port, () => {
@@ -71,4 +67,5 @@ const main = async () => {
 
 main().catch((err) => {
   console.error("Erreur serveur :", err);
+  process.exit(1);
 });

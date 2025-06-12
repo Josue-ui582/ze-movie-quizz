@@ -3,7 +3,7 @@ import { withUrqlClient } from "next-urql";
 import { useRouter } from "next/router";
 import { useGetByUsernameQuery } from "../../generated/graphql";
 import { createUrqlClient } from "../../utils/createUrqlClient";
-import { Flex } from "@chakra-ui/react";
+import { Flex, Spinner } from "@chakra-ui/react";
 
 const User: NextPage = () => {
   const router = useRouter();
@@ -16,27 +16,27 @@ const User: NextPage = () => {
   if (fetching) {
     return (
       <Flex alignItems="center" h="100vh" justifyContent="center">
-        loading...
+        <Spinner size="xl" thickness="4px" speed="0.65s" color="teal.500" />
       </Flex>
     );
   } else if (error) {
     return (
       <Flex alignItems="center" h="100vh" justifyContent="center">
-        {" "}
-        an error occurered when fetching
+        Une erreur est survenue lors du chargement
       </Flex>
     );
   } else {
     return (
-      <Flex
-        alignItems="center"
-        h="100vh"
-        justifyContent="center"
-        fontWeight="bold"
-        fontSize="5xl"
-      >
-        Bienvenue sur ze-movie-quizz, {name} !
-      </Flex>
+    <Flex
+      alignItems="flex-start"
+      justifyContent="center"
+      h="100vh"
+      pt="10"
+      fontWeight="bold"
+      fontSize="5xl"
+    >
+      Bienvenue sur ze-movie-quizz, {name} !
+    </Flex>
     );
   }
 };

@@ -45,7 +45,11 @@ const Login: NextPage<ILoginProps> = () => {
               )
             );
           } else if (loginResponse?.user) {
-            router.push(`/user/${loginResponse.user.username}`);
+            router.push({
+              pathname: "/play",
+              query: { username: loginResponse.user.username },
+          });
+
           }
         }}
       >
