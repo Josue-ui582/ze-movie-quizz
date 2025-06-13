@@ -96,6 +96,7 @@ export type Movie = {
 export type AnswerResponse = {
   __typename?: 'AnswerResponse';
   correct: Scalars['Boolean'];
+  correctMovieTitle?: Maybe<Scalars['String']>;
 };
 
 //
@@ -285,6 +286,7 @@ export type CheckAnswerMutation = {
   checkAnswer: {
     __typename?: 'AnswerResponse';
     correct: boolean;
+    correctMovieTitle?: string | null;
   };
 };
 
@@ -292,6 +294,7 @@ export const CheckAnswerDocument = gql`
   mutation CheckAnswer($hash: String!, $userAnswer: Boolean!) {
     checkAnswer(hash: $hash, userAnswer: $userAnswer) {
       correct
+      correctMovieTitle
     }
   }
 `;

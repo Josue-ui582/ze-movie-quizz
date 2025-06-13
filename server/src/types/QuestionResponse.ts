@@ -1,22 +1,15 @@
 import { ObjectType, Field } from "type-graphql";
+import { Actor } from "../entities/QuestionResponse";
+import { Movie } from "../entities/QuestionResponse";
 
 @ObjectType()
 export class QuestionResponse {
   @Field()
   hash: string;
 
-  @Field()
-  actor: string;
+  @Field(() => Actor)
+  actor: Actor;
 
-  @Field()
-  movie: string;
-}
-
-@ObjectType()
-export class CheckAnswerResponse {
-  @Field()
-  correct: boolean;
-
-  @Field({ nullable: true })
-  message?: string;
+  @Field(() => Movie)
+  movie: Movie;
 }

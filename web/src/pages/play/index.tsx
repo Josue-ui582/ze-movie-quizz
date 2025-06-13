@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Button, Center, Spinner, VStack, Flex } from "@chakra-ui/react";
+import { Button, Center, Spinner, VStack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import Timer from "../../components/Timer";
 import QuestionCard from "../../components/QuestionCard";
-import ResultScreen from "../../components/ResultScreen";
 import { useGetQuestionQuery, useCheckAnswerMutation } from "../../generated/graphql";
+import ResultScreen from "../../components/ResultScreen";
 
 const PlayPage = () => {
   const router = useRouter();
@@ -14,10 +14,16 @@ const PlayPage = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [questionsPlayed, setQuestionsPlayed] = useState(0);
+  const [wrongAnswers, setWrongAnswers] = useState<
+  { actorName: string; wrongMovieTitle: string; correctMovieTitle: string }[]
+  >([]);
+  const [fetchQuestion, setFetchQuestion] = useState(false);
 
-  const [{ data, fetching }, refetch] = useGetQuestionQuery({
-    pause: !gameStarted || gameOver,
+  const [{ data, fetching }, reexecuteQuery] = useGetQuestionQuery({
+  requestPolicy: "network-only",
   });
+
 
   const [, checkAnswer] = useCheckAnswerMutation();
 
@@ -29,31 +35,45 @@ const PlayPage = () => {
 
   const handleStart = () => {
     setScore(0);
-    setGameStarted(true);
+    setQuestionsPlayed(0);
     setGameOver(false);
-    refetch();
+    setGameStarted(true);
+    setFetchQuestion(true);
+    reexecuteQuery({ requestPolicy: "network-only" });
   };
 
   const handleAnswer = async (userAnswer: boolean) => {
-    if (!data?.getQuestion) return;
+  if (!data?.getQuestion) return;
 
-    const result = await checkAnswer({
-      hash: data.getQuestion.hash,
-      userAnswer,
-    });
+  const result = await checkAnswer({
+    hash: data.getQuestion.hash,
+    userAnswer,
+  });
 
-    const isCorrect = result.data?.checkAnswer?.correct;
+  const isCorrect = result.data?.checkAnswer?.correct;
 
-    if (isCorrect) {
-      setScore((prev) => prev + 1);
-      refetch();
-    } else {
-      setGameOver(true);
-    }
-  };
+  setQuestionsPlayed((prev) => prev + 1);
+
+  if (isCorrect) {
+    setScore((prev) => prev + 1);
+  } else {
+    setWrongAnswers((prev) => [
+      ...prev,
+      {
+        actorName: data.getQuestion.actor.name,
+        wrongMovieTitle: data.getQuestion.movie.title,
+        correctMovieTitle: result.data?.checkAnswer?.correctMovieTitle ?? "Inconnu",
+      },
+    ]);
+  }
+  reexecuteQuery({ requestPolicy: "network-only" });
+};
+
+
 
   const handleTimeUp = () => {
     setGameOver(true);
+    setFetchQuestion(false);
   };
 
   const handleReplay = () => {
@@ -63,24 +83,31 @@ const PlayPage = () => {
   return (
     <Center minH="100vh" p={6} flexDirection="column">
       {name && (
-        <Flex
-              alignItems="flex-start"
-              justifyContent="center"
-              h="100vh"
-              pt="10"
-              fontWeight="bold"
-              fontSize="5xl"
-            >
-              Bienvenue sur ze-movie-quizz, {name} !
-        </Flex>
+        <>
+          <Text fontSize="5xl" fontWeight="bold" mb={2}>
+            Bienvenue sur ze-movie-quizz, {name} !
+          </Text>
+          <Text fontSize="lg" color="gray.600" mb={8} textAlign="center" maxW="600px">
+            Ce jeu consiste à deviner si un acteur a réellement joué dans un film donné. Vous avez 60 secondes pour répondre correctement à autant de questions que possible. Bonne chance !
+          </Text>
+        </>
       )}
 
       {!gameStarted ? (
-        <Button size="lg" colorScheme="blue" onClick={handleStart}>
-          Jouer
-        </Button>
+        <Center flex="1">
+          <Button size="lg" colorScheme="blue" onClick={handleStart}>
+            Jouer
+          </Button>
+        </Center>
       ) : gameOver ? (
-        <ResultScreen score={score} onReplay={handleReplay} />
+        <ResultScreen
+        score={score}
+        questionsPlayed={questionsPlayed}
+        wrongAnswers={wrongAnswers}
+        onReplay={handleReplay}
+        gameOver
+      />
+
       ) : (
         <VStack spacing={10}>
           <Timer initialTime={60} onTimeUp={handleTimeUp} />

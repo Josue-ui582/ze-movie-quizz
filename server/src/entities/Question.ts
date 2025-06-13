@@ -1,40 +1,40 @@
-import { ObjectType, Field} from "type-graphql";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, CreateDateColumn } from "typeorm";
+import { ObjectType, Field } from "type-graphql";
 
 @ObjectType()
-export class Actor {
+@Entity()
+export class Question extends BaseEntity {
   @Field()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Field()
-  name: string;
-}
-
-@ObjectType()
-export class Movie {
-  @Field()
-  id: number;
-
-  @Field()
-  title: string;
-
-  @Field()
-  poster: string;
-}
-
-@ObjectType()
-export class QuestionResponse {
-  @Field()
+  @Column({ unique: true })
   hash: string;
 
-  @Field(() => Actor)
-  actor: Actor;
-
-  @Field(() => Movie)
-  movie: Movie;
-}
-
-@ObjectType()
-export class CheckAnswerResponse {
   @Field()
-  correct: boolean;
+  @Column()
+  actorName: string;
+
+  @Field()
+  @Column()
+  actorId: number;
+
+  @Field()
+  @Column()
+  movieTitle: string;
+
+  @Field()
+  @Column()
+  movieId: number;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  moviePoster: string;
+
+  @Column()
+  correctAnswer: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
