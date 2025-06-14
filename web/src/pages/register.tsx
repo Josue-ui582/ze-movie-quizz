@@ -2,18 +2,30 @@ import { NextPage } from "next";
 import { Formik, Form } from "formik";
 import { Wrapper } from "../components/Wrapper";
 import { Box, Button, Text, Link } from "@chakra-ui/react";
-import NextLink from "next/link";  // Pour le lien vers la page login
+import NextLink from "next/link";
 import { InputField } from "../components/InputField";
 import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { useRegisterMutation } from "../generated/graphql";
 import { useRouter } from "next/router";
+import * as Yup from "yup";
 
 interface IRegisterProps {}
 
 const Register: NextPage<IRegisterProps> = () => {
   const router = useRouter();
   const [, register] = useRegisterMutation();
+
+  const validationSchema = Yup.object({
+    username: Yup.string()
+      .required("Le nom d'utilisateur est requis"),
+    email: Yup.string()
+      .required("L'email est requis")
+      .email("Adresse email invalide")
+      .matches(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, "L'email doit se terminer par @gmail.com"),
+    password: Yup.string()
+      .required("Le mot de passe est requis"),
+  });
 
   return (
     <Wrapper variant="small">
@@ -27,6 +39,7 @@ const Register: NextPage<IRegisterProps> = () => {
 
       <Formik
         initialValues={{ username: "", email: "", password: "" }}
+        validationSchema={validationSchema} // ✅ Ajout de la validation
         onSubmit={async (values, { setErrors }) => {
           const response = await register({ input: values });
           const registerResponse = response.data?.register;
@@ -66,7 +79,7 @@ const Register: NextPage<IRegisterProps> = () => {
               Register
             </Button>
 
-            <Text textAlign="center">
+            <Text textAlign="center" mt={4}>
               Déjà inscrit ?{" "}
               <NextLink href="/login" passHref>
                 <Link color="blue.500" fontWeight="bold">

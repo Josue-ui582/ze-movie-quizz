@@ -8,6 +8,7 @@ import { withUrqlClient } from "next-urql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { useLoginMutation } from "../generated/graphql";
 import { useRouter } from "next/router";
+import * as Yup from "yup";
 
 interface ILoginProps {}
 
@@ -15,18 +16,24 @@ const Login: NextPage<ILoginProps> = () => {
   const router = useRouter();
   const [, login] = useLoginMutation();
 
+  const validationSchema = Yup.object({
+    username: Yup.string().required("Le nom d'utilisateur est requis"),
+    password: Yup.string().required("Le mot de passe est requis"),
+  });
+
   return (
     <Wrapper variant="small">
       <Text fontSize="2xl" fontWeight="bold" mb={6} textAlign="center">
         Bienvenue sur zee-movie-quiz
       </Text>
 
-        <Text mt={6} mb={2} textAlign="center" color="gray.600">
-            Pour jouer à ce jeu, veuillez vous connecter.
-        </Text>
+      <Text mt={6} mb={2} textAlign="center" color="gray.600">
+        Pour jouer à ce jeu, veuillez vous connecter.
+      </Text>
 
       <Formik
         initialValues={{ username: "", password: "" }}
+        validationSchema={validationSchema}
         onSubmit={async (values, { setErrors }) => {
           const response = await login(values);
           console.log("Login response raw:", response);
@@ -48,8 +55,7 @@ const Login: NextPage<ILoginProps> = () => {
             router.push({
               pathname: "/play",
               query: { username: loginResponse.user.username },
-          });
-
+            });
           }
         }}
       >
@@ -69,7 +75,7 @@ const Login: NextPage<ILoginProps> = () => {
               Login
             </Button>
 
-            <Text textAlign="center">
+            <Text textAlign="center" mt={4}>
               Pas encore inscrit ?{" "}
               <NextLink href="/register" passHref>
                 <Link color="blue.500" fontWeight="bold">
