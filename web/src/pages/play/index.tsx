@@ -33,6 +33,13 @@ const PlayPage = () => {
     }
   }, [username]);
 
+  useEffect(() => {
+    const saved = localStorage.getItem("bestScore");
+    if (saved) {
+      setBestScore(parseInt(saved, 10));
+    }
+  }, []);
+
   const handleStart = () => {
     setScore(0);
     setQuestionsPlayed(0);
@@ -47,7 +54,8 @@ const PlayPage = () => {
     setFetchQuestion(false);
     if (score > bestScore) {
       setBestScore(score);
-    }
+      localStorage.setItem("bestScore", score.toString());
+  }
   };
 
   const handleAnswer = async (userAnswer: boolean) => {

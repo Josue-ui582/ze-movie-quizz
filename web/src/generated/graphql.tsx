@@ -3,9 +3,15 @@ import * as Urql from 'urql';
 
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
-export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+export type Exact<T extends { [key: string]: unknown }> = {
+  [K in keyof T]: T[K];
+};
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]?: Maybe<T[SubKey]>;
+};
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & {
+  [SubKey in K]: Maybe<T[SubKey]>;
+};
 
 export type Scalars = {
   ID: string;
@@ -15,11 +21,66 @@ export type Scalars = {
   Float: number;
 };
 
-// --- Types déjà existants pour l'auth ---
+// ---------- Types GraphQL ----------
+
 export type FieldError = {
   __typename?: 'FieldError';
   field: Scalars['String'];
   message: Scalars['String'];
+};
+
+export type User = {
+  __typename?: 'User';
+  id: Scalars['Int'];
+  username: Scalars['String'];
+  email: Scalars['String'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type UserInput = {
+  username: Scalars['String'];
+  email: Scalars['String'];
+  password: Scalars['String'];
+};
+
+export type UserResponse = {
+  __typename?: 'UserResponse';
+  user?: Maybe<User>;
+  errors?: Maybe<Array<FieldError>>;
+};
+
+export type Actor = {
+  __typename?: 'Actor';
+  name: Scalars['String'];
+};
+
+export type Movie = {
+  __typename?: 'Movie';
+  title: Scalars['String'];
+  poster: Scalars['String'];
+};
+
+export type Question = {
+  __typename?: 'Question';
+  hash: Scalars['String'];
+  actor: Actor;
+  movie: Movie;
+};
+
+export type AnswerResponse = {
+  __typename?: 'AnswerResponse';
+  correct: Scalars['Boolean'];
+};
+
+export type Query = {
+  __typename?: 'Query';
+  getByUsername?: Maybe<User>;
+  getQuestion: Question;
+};
+
+export type QueryGetByUsernameArgs = {
+  username: Scalars['String'];
 };
 
 export type Mutation = {
@@ -43,65 +104,7 @@ export type MutationCheckAnswerArgs = {
   userAnswer: Scalars['Boolean'];
 };
 
-export type Query = {
-  __typename?: 'Query';
-  getByUsername?: Maybe<User>;
-  getQuestion: Question;
-};
-
-export type QueryGetByUsernameArgs = {
-  username: Scalars['String'];
-};
-
-// --- Types utilisateur ---
-export type User = {
-  __typename?: 'User';
-  id: Scalars['Int'];
-  username: Scalars['String'];
-  email: Scalars['String'];
-  createdAt: Scalars['String'];
-  updatedAt: Scalars['String'];
-};
-
-export type UserInput = {
-  username: Scalars['String'];
-  email: Scalars['String'];
-  password: Scalars['String'];
-};
-
-export type UserResponse = {
-  __typename?: 'UserResponse';
-  user?: Maybe<User>;
-  errors?: Maybe<Array<FieldError>>;
-};
-
-export type Question = {
-  __typename?: 'Question';
-  hash: Scalars['String'];
-  actor: Actor;
-  movie: Movie;
-};
-
-export type Actor = {
-  __typename?: 'Actor';
-  name: Scalars['String'];
-};
-
-export type Movie = {
-  __typename?: 'Movie';
-  title: Scalars['String'];
-  poster: Scalars['String'];
-};
-
-export type AnswerResponse = {
-  __typename?: 'AnswerResponse';
-  correct: Scalars['Boolean'];
-  correctMovieTitle?: Maybe<Scalars['String']>;
-};
-
-//
-// --- Mutations déjà présentes ---
-//
+// ---------- Register Mutation ----------
 
 export type RegisterMutationVariables = Exact<{
   input: UserInput;
@@ -146,8 +149,12 @@ export const RegisterDocument = gql`
 `;
 
 export function useRegisterMutation() {
-  return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument);
+  return Urql.useMutation<RegisterMutation, RegisterMutationVariables>(
+    RegisterDocument
+  );
 }
+
+// ---------- Login Mutation ----------
 
 export type LoginMutationVariables = Exact<{
   username: Scalars['String'];
@@ -193,8 +200,12 @@ export const LoginDocument = gql`
 `;
 
 export function useLoginMutation() {
-  return Urql.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument);
+  return Urql.useMutation<LoginMutation, LoginMutationVariables>(
+    LoginDocument
+  );
 }
+
+// ---------- GetByUsername Query ----------
 
 export type GetByUsernameQueryVariables = Exact<{
   username: Scalars['String'];
@@ -232,6 +243,10 @@ export function useGetByUsernameQuery(
     ...options,
   });
 }
+
+// ---------- GetQuestion Query ----------
+
+export type GetQuestionQueryVariables = Exact<{ [key: string]: never }>;
 
 export type GetQuestionQuery = {
   __typename?: 'Query';
@@ -274,7 +289,7 @@ export function useGetQuestionQuery(
   });
 }
 
-export type GetQuestionQueryVariables = Exact<{ [key: string]: never }>;
+// ---------- CheckAnswer Mutation ----------
 
 export type CheckAnswerMutationVariables = Exact<{
   hash: Scalars['String'];
@@ -286,7 +301,6 @@ export type CheckAnswerMutation = {
   checkAnswer: {
     __typename?: 'AnswerResponse';
     correct: boolean;
-    correctMovieTitle?: string | null;
   };
 };
 
@@ -294,11 +308,12 @@ export const CheckAnswerDocument = gql`
   mutation CheckAnswer($hash: String!, $userAnswer: Boolean!) {
     checkAnswer(hash: $hash, userAnswer: $userAnswer) {
       correct
-      correctMovieTitle
     }
   }
 `;
 
 export function useCheckAnswerMutation() {
-  return Urql.useMutation<CheckAnswerMutation, CheckAnswerMutationVariables>(CheckAnswerDocument);
+  return Urql.useMutation<CheckAnswerMutation, CheckAnswerMutationVariables>(
+    CheckAnswerDocument
+  );
 }
