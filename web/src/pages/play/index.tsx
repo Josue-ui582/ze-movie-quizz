@@ -49,31 +49,22 @@ const PlayPage = () => {
     reexecuteQuery({ requestPolicy: "network-only" });
   };
 
-  const handleGameOver = () => {
+  const handleGameOver = (finalScore: number) => {
     setGameOver(true);
     setFetchQuestion(false);
-    if (score > bestScore) {
-      setBestScore(score);
-      localStorage.setItem("bestScore", score.toString());
-  }
+    if (finalScore > bestScore) {
+      setBestScore(finalScore);
+      localStorage.setItem("bestScore", finalScore.toString());
+    }
   };
+
 
   const handleAnswer = async (userAnswer: boolean) => {
     if (!data?.getQuestion) return;
-
-    console.log("Question envoyée:", {
-      actor: data.getQuestion.actor.name,
-      movie: data.getQuestion.movie.title,
-      hash: data.getQuestion.hash,
-      userAnswer,
-    });
-
     const result = await checkAnswer({
       hash: data.getQuestion.hash,
       userAnswer,
     });
-
-    console.log("Résultat mutation:", result);
 
     const isCorrect = result.data?.checkAnswer?.correct;
 
@@ -83,12 +74,12 @@ const PlayPage = () => {
       setScore((prev) => prev + 1);
       reexecuteQuery({ requestPolicy: "network-only" });
     } else {
-      handleGameOver(); // arrêt du jeu à la première erreur
+      handleGameOver(score);
     }
   };
 
   const handleTimeUp = () => {
-    handleGameOver(); // arrêt du jeu quand le temps est écoulé
+    handleGameOver(score);
   };
 
   const handleReplay = () => {
@@ -133,6 +124,9 @@ const PlayPage = () => {
       ) : (
         <VStack spacing={10}>
           <Timer initialTime={60} onTimeUp={handleTimeUp} />
+          <Text fontSize="2xl" fontWeight="semibold" color="green.600">
+            Score actuel : {score}
+          </Text>
           {fetching || !data?.getQuestion ? (
             <Spinner size="xl" />
           ) : (
