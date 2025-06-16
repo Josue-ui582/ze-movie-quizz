@@ -3,27 +3,27 @@ import { Button, Center, Spinner, VStack, Text } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import Timer from "../../components/Timer";
 import QuestionCard from "../../components/QuestionCard";
-import { useGetQuestionQuery, useCheckAnswerMutation } from "../../generated/graphql";
 import ResultScreen from "../../components/ResultScreen";
+import {
+  useGetQuestionQuery,
+  useCheckAnswerMutation,
+} from "../../generated/graphql";
 
 const PlayPage = () => {
   const router = useRouter();
   const { username } = router.query;
-  const [name, setName] = useState<string | null>(null);
 
+  const [name, setName] = useState<string | null>(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
   const [questionsPlayed, setQuestionsPlayed] = useState(0);
-  const [wrongAnswers, setWrongAnswers] = useState<
-  { actorName: string; wrongMovieTitle: string; correctMovieTitle: string }[]
-  >([]);
   const [fetchQuestion, setFetchQuestion] = useState(false);
 
   const [{ data, fetching }, reexecuteQuery] = useGetQuestionQuery({
-  requestPolicy: "network-only",
+    requestPolicy: "network-only",
   });
-
 
   const [, checkAnswer] = useCheckAnswerMutation();
 
@@ -42,38 +42,45 @@ const PlayPage = () => {
     reexecuteQuery({ requestPolicy: "network-only" });
   };
 
-  const handleAnswer = async (userAnswer: boolean) => {
-  if (!data?.getQuestion) return;
-
-  const result = await checkAnswer({
-    hash: data.getQuestion.hash,
-    userAnswer,
-  });
-
-  const isCorrect = result.data?.checkAnswer?.correct;
-
-  setQuestionsPlayed((prev) => prev + 1);
-
-  if (isCorrect) {
-    setScore((prev) => prev + 1);
-  } else {
-    setWrongAnswers((prev) => [
-      ...prev,
-      {
-        actorName: data.getQuestion.actor.name,
-        wrongMovieTitle: data.getQuestion.movie.title,
-        correctMovieTitle: result.data?.checkAnswer?.correctMovieTitle ?? "Inconnu",
-      },
-    ]);
-  }
-  reexecuteQuery({ requestPolicy: "network-only" });
-};
-
-
-
-  const handleTimeUp = () => {
+  const handleGameOver = () => {
     setGameOver(true);
     setFetchQuestion(false);
+    if (score > bestScore) {
+      setBestScore(score);
+    }
+  };
+
+  const handleAnswer = async (userAnswer: boolean) => {
+    if (!data?.getQuestion) return;
+
+    console.log("Question envoyée:", {
+      actor: data.getQuestion.actor.name,
+      movie: data.getQuestion.movie.title,
+      hash: data.getQuestion.hash,
+      userAnswer,
+    });
+
+    const result = await checkAnswer({
+      hash: data.getQuestion.hash,
+      userAnswer,
+    });
+
+    console.log("Résultat mutation:", result);
+
+    const isCorrect = result.data?.checkAnswer?.correct;
+
+    setQuestionsPlayed((prev) => prev + 1);
+
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+      reexecuteQuery({ requestPolicy: "network-only" });
+    } else {
+      handleGameOver(); // arrêt du jeu à la première erreur
+    }
+  };
+
+  const handleTimeUp = () => {
+    handleGameOver(); // arrêt du jeu quand le temps est écoulé
   };
 
   const handleReplay = () => {
@@ -87,8 +94,16 @@ const PlayPage = () => {
           <Text fontSize="5xl" fontWeight="bold" mb={2}>
             Bienvenue sur ze-movie-quizz, {name} !
           </Text>
-          <Text fontSize="lg" color="gray.600" mb={8} textAlign="center" maxW="600px">
-            Ce jeu consiste à deviner si un acteur a réellement joué dans un film donné. Vous avez 60 secondes pour répondre correctement à autant de questions que possible. Bonne chance !
+          <Text
+            fontSize="lg"
+            color="gray.600"
+            mb={8}
+            textAlign="center"
+            maxW="600px"
+          >
+            Ce jeu consiste à deviner si un acteur a réellement joué dans un
+            film donné. Le jeu s'arrête à la première erreur ou à la fin des
+            60 secondes. Tentez de battre votre meilleur score !
           </Text>
         </>
       )}
@@ -101,13 +116,12 @@ const PlayPage = () => {
         </Center>
       ) : gameOver ? (
         <ResultScreen
-        score={score}
-        questionsPlayed={questionsPlayed}
-        wrongAnswers={wrongAnswers}
-        onReplay={handleReplay}
-        gameOver
-      />
-
+          score={score}
+          questionsPlayed={questionsPlayed}
+          onReplay={handleReplay}
+          bestScore={bestScore}
+          gameOver
+        />
       ) : (
         <VStack spacing={10}>
           <Timer initialTime={60} onTimeUp={handleTimeUp} />

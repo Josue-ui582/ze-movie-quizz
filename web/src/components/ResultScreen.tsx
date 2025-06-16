@@ -1,54 +1,37 @@
-import { Button, Center, Text, VStack, Box, List, ListItem, ListIcon, Heading } from "@chakra-ui/react";
-
-interface WrongAnswer {
-  actorName: string;
-  wrongMovieTitle: string;
-  correctMovieTitle: string;
-}
+import { Button, Center, Text, VStack, Heading } from "@chakra-ui/react";
 
 interface ResultScreenProps {
   score: number;
+  bestScore: number;
   questionsPlayed: number;
-  wrongAnswers: WrongAnswer[];
   onReplay: () => void;
   gameOver: boolean;
 }
 
 const ResultScreen: React.FC<ResultScreenProps> = ({
   score,
+  bestScore,
   questionsPlayed,
-  wrongAnswers,
   onReplay
 }) => {
   return (
     <Center minH="60vh" p={6} flexDirection="column">
-      <VStack spacing={6} maxW="600px" w="100%">
+      <VStack spacing={6} maxW="600px" w="100%" textAlign="center">
         <Heading as="h2" size="xl">
-          Résultats
+          Fin du jeu 🎬
         </Heading>
 
         <Text fontSize="lg">
-          Vous avez joué à <b>{questionsPlayed}</b> question{questionsPlayed > 1 ? "s" : ""}.
-        </Text>
-        <Text fontSize="lg">
-          Votre score est : <b>{score}</b>
+          Vous avez répondu à <b>{questionsPlayed}</b> question{questionsPlayed > 1 ? "s" : ""}.
         </Text>
 
-        {wrongAnswers.length > 0 && (
-          <Box w="100%" p={4} borderWidth="1px" borderRadius="md" bg="red.50">
-            <Heading as="h3" size="md" mb={4} color="red.600">
-              Mauvaises réponses :
-            </Heading>
+        <Text fontSize="2xl" fontWeight="bold" color="blue.500">
+          Votre score : {score}
+        </Text>
 
-            <List spacing={3}>
-              {wrongAnswers.map(({ actorName, wrongMovieTitle, correctMovieTitle }, index) => (
-                <ListItem key={index}>
-                  L'acteur <b>{actorName}</b> n'a pas joué dans <i>{wrongMovieTitle}</i>, mais plutôt dans <i>{correctMovieTitle}</i>.
-                </ListItem>
-              ))}
-            </List>
-          </Box>
-        )}
+        <Text fontSize="lg" color="gray.600">
+          Meilleur score : <b>{bestScore}</b>
+        </Text>
 
         <Button colorScheme="blue" size="lg" onClick={onReplay}>
           Rejouer
