@@ -273,6 +273,7 @@ export const GetQuestionDocument = gql`
       hash
       actor {
         name
+        avatar
       }
       movie {
         title

@@ -1,36 +1,17 @@
 import { ObjectType, Field} from "type-graphql";
-
-@ObjectType()
-export class Actor {
-  @Field()
-  id: number;
-
-  @Field()
-  name: string;
-}
-
-@ObjectType()
-export class Movie {
-  @Field()
-  id: number;
-
-  @Field()
-  title: string;
-
-  @Field()
-  poster: string;
-}
+import { ActorType } from "../types/Actor";
+import { MovieType } from "../types/Movie";
 
 @ObjectType()
 export class QuestionResponse {
   @Field()
   hash: string;
 
-  @Field(() => Actor)
-  actor: Actor;
+  @Field(() => ActorType)
+  actor: ActorType;
 
-  @Field(() => Movie)
-  movie: Movie;
+  @Field(() => MovieType)
+  movie: MovieType;
 }
 
 @ObjectType()
