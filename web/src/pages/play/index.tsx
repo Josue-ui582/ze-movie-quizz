@@ -130,12 +130,16 @@ const PlayPage = () => {
           {fetching || !data?.getQuestion ? (
             <Spinner size="xl" />
           ) : (
-            <QuestionCard
-              actorName={data.getQuestion.actor.name}
-              movieTitle={data.getQuestion.movie.title}
-              moviePoster={data.getQuestion.movie.poster}
-              onAnswer={handleAnswer}
-            />
+            <>
+              {console.log("Avatar URL dans PlayPage:", data.getQuestion.actor.avatar)}
+              <QuestionCard
+                actorName={data.getQuestion.actor.name}
+                actorAvatar={data.getQuestion.actor.avatar ?? undefined}
+                movieTitle={data.getQuestion.movie.title}
+                moviePoster={data.getQuestion.movie.poster}
+                onAnswer={handleAnswer}
+              />
+            </>
           )}
         </VStack>
       )}

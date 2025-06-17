@@ -53,6 +53,7 @@ export type UserResponse = {
 export type Actor = {
   __typename?: 'Actor';
   name: Scalars['String'];
+  avatar?: Maybe<Scalars['String']>;
 };
 
 export type Movie = {
@@ -256,6 +257,7 @@ export type GetQuestionQuery = {
     actor: {
       __typename?: 'Actor';
       name: string;
+      avatar?: string | null;
     };
     movie: {
       __typename?: 'Movie';

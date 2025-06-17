@@ -42,6 +42,9 @@ export class TMDBService {
       const actor = popularActors.results[Math.floor(Math.random() * popularActors.results.length)];
       const credits = await this.fetchFromTMDB(`/person/${actor.id}/movie_credits?language=fr-FR`);
 
+      console.log("Actor raw data from TMDB:", actor);
+
+
       if (!credits.cast || credits.cast.length === 0) {
         throw new Error("Aucun crédit de film trouvé pour cet acteur");
       }
@@ -81,13 +84,20 @@ export class TMDBService {
 
       return {
         hash,
-        actor: { id: actor.id, name: actor.name },
+        actor: {
+          id: actor.id,
+          name: actor.name,
+          avatar: actor.profile_path
+            ? `https://image.tmdb.org/t/p/w300${actor.profile_path}`
+            : null,
+        },
         movie: {
           id: questionMovie.id,
           title: questionMovie.title,
           poster: `https://image.tmdb.org/t/p/w500${questionMovie.poster_path}`,
         },
       };
+
     } catch (err) {
       console.error("❌ Échec de génération de question :", err);
       throw err;

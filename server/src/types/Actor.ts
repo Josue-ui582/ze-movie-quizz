@@ -7,4 +7,7 @@ export class ActorType {
 
   @Field()
   name: string;
+
+  @Field({ nullable: true })
+  avatar?: string;
 }

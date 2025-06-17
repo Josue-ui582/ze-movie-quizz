@@ -3,6 +3,7 @@ query GetQuestion {
     hash
     actor {
       name
+      avatar
     }
     movie {
       title

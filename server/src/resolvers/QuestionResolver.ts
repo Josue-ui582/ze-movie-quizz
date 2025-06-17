@@ -15,6 +15,7 @@ export class QuestionResolver {
         hash: question.hash,
         actor: {
           name: question.actor.name,
+          avatar: question.actor.avatar,
         },
         movie: {
           title: question.movie.title,
